@@ -1,0 +1,251 @@
+// Skema database GymFit (SQLite untuk pengembangan).
+// Untuk PostgreSQL: ubah provider di datasource dan adapter di PrismaService.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// role: MEMBER | TRAINER | ADMIN
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         String   @default("MEMBER")
+  photoUrl     String?
+  // Untuk ADMIN: cabang gym yang dikelola
+  managedGymId String?
+  // Data pemilik gym (diisi saat daftar lewat website): tempat & tanggal lahir
+  birthPlace   String?
+  birthDate    DateTime?
+  createdAt    DateTime @default(now())
+
+  managedGym     Gym?             @relation("GymAdmin", fields: [managedGymId], references: [id])
+  trainerProfile TrainerProfile?
+  memberships    GymMembership[]
+  bookings       Booking[]        @relation("ClientBookings")
+  goals          ClientGoal[]
+  mealPlanItems  MealPlanItem[] @relation("ClientMeals")
+  workoutItems   WorkoutPlanItem[] @relation("ClientWorkouts")
+  workoutLogs    WorkoutLog[]
+  sessionPackages SessionPackage[] @relation("ClientPackages")
+}
+
+model Gym {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  city        String
+  address     String
+  openHours   String
+  phone       String
+  imageUrl    String
+  rating      Float    @default(0)
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  facilities  GymFacility[]
+  images      GymImage[]
+  plans       GymPlan[]
+  trainers    TrainerProfile[]
+  memberships GymMembership[]
+  admins      User[]           @relation("GymAdmin")
+}
+
+model GymFacility {
+  id    String @id @default(cuid())
+  gymId String
+  label String
+  icon  String
+
+  gym Gym @relation(fields: [gymId], references: [id], onDelete: Cascade)
+}
+
+// Foto fasilitas yang diunggah admin gym (file disimpan di folder uploads/)
+model GymImage {
+  id        String   @id @default(cuid())
+  gymId     String
+  url       String
+  createdAt DateTime @default(now())
+
+  gym Gym @relation(fields: [gymId], references: [id], onDelete: Cascade)
+}
+
+model GymPlan {
+  id           String  @id @default(cuid())
+  gymId        String
+  name         String
+  price        Int
+  durationDays Int
+  note         String
+  isPopular    Boolean @default(false)
+
+  gym         Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  memberships GymMembership[]
+}
+
+// status: ACTIVE | EXPIRED
+model GymMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  gymId     String
+  planId    String
+  price     Int
+  startDate DateTime @default(now())
+  endDate   DateTime
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gym  Gym     @relation(fields: [gymId], references: [id])
+  plan GymPlan @relation(fields: [planId], references: [id])
+}
+
+model TrainerProfile {
+  id              String @id @default(cuid())
+  userId          String @unique
+  gymId           String
+  specialization  String
+  experienceYears Int    @default(0)
+  bio             String @default("")
+  rating          Float  @default(0)
+  reviewsCount    Int    @default(0)
+  // false = PT dinonaktifkan admin: tidak tampil & tidak bisa dibooking di aplikasi
+  isActive        Boolean @default(true)
+
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gym       Gym               @relation(fields: [gymId], references: [id])
+  schedules TrainerSchedule[]
+  bookings  Booking[]
+  goals     ClientGoal[]
+  mealPlanItems MealPlanItem[]
+  workoutItems  WorkoutPlanItem[]
+  sessionPackages SessionPackage[]
+}
+
+model TrainerSchedule {
+  id        String @id @default(cuid())
+  trainerId String
+  day       String // Senin, Selasa, ...
+  startTime String // HH:mm
+  endTime   String // HH:mm
+
+  trainer TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+}
+
+// status: PENDING | ACCEPTED | REJECTED | COMPLETED | CANCELLED
+model Booking {
+  id          String   @id @default(cuid())
+  clientId    String
+  trainerId   String
+  scheduledAt DateTime
+  durationMin Int      @default(60)
+  note        String   @default("")
+  // Paket tujuan: WEIGHT_LOSS | MUSCLE_GAIN | TONING | ENDURANCE | REHAB | GENERAL
+  goalType    String   @default("GENERAL")
+  // Tujuan bebas (teks) bila pilihan paket tujuan tidak ada yang cocok. Opsional.
+  customGoal  String   @default("")
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  client  User             @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
+  trainer TrainerProfile   @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  session TrainingSession?
+}
+
+// attendance: HADIR | TERLAMBAT | TIDAK_HADIR
+model TrainingSession {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  attendance  String
+  intensity   Int
+  notes       String   @default("")
+  completedAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model ClientGoal {
+  id             String   @id @default(cuid())
+  clientId       String
+  trainerId      String
+  description    String
+  targetCalories Int?
+  targetProtein  Int?
+  updatedAt      DateTime @updatedAt
+
+  client  User           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  trainer TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, trainerId])
+}
+
+// Pola makan harian klien yang dibuat/diubah PT. Klien hanya membaca miliknya sendiri.
+model MealPlanItem {
+  id          String   @id @default(cuid())
+  clientId    String
+  trainerId   String
+  time        String // HH:mm
+  category    String // Sarapan, Makan Siang, Snack, Makan Malam, ...
+  description String
+  calories    Int
+  protein     Int
+  updatedAt   DateTime @updatedAt
+
+  client  User           @relation("ClientMeals", fields: [clientId], references: [id], onDelete: Cascade)
+  trainer TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+}
+
+// Program latihan klien yang disusun PT. Klien hanya membaca miliknya sendiri.
+model WorkoutPlanItem {
+  id        String   @id @default(cuid())
+  clientId  String
+  trainerId String
+  dayLabel  String // "Hari 1 - Dada & Triceps"
+  exercise  String // nama gerakan
+  sets      Int
+  reps      String // "10-12" / "30 detik"
+  restSec   Int?
+  note      String   @default("")
+  position  Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  client  User           @relation("ClientWorkouts", fields: [clientId], references: [id], onDelete: Cascade)
+  trainer TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  logs    WorkoutLog[]
+}
+
+// Catatan klien: "gerakan ini sudah saya kerjakan". Dipakai untuk log progres.
+model WorkoutLog {
+  id           String   @id @default(cuid())
+  clientId     String
+  itemId       String?
+  exerciseName String
+  createdAt    DateTime @default(now())
+
+  client User             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  item   WorkoutPlanItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+}
+
+// Kuota sesi PT per pasangan klien-PT. Default 8 sesi untuk semua PT.
+// Sisa kuota = totalSessions - jumlah booking berstatus COMPLETED.
+model SessionPackage {
+  id            String   @id @default(cuid())
+  clientId      String
+  trainerId     String
+  totalSessions Int      @default(8)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  client  User           @relation("ClientPackages", fields: [clientId], references: [id], onDelete: Cascade)
+  trainer TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, trainerId])
+}

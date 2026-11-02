@@ -1,0 +1,135 @@
+CREATE TABLE "User" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "name" TEXT NOT NULL,
+  "email" TEXT NOT NULL,
+  "phone" TEXT,
+  "passwordHash" TEXT NOT NULL,
+  "role" TEXT NOT NULL DEFAULT 'MEMBER',
+  "photoUrl" TEXT,
+  "managedGymId" TEXT,
+  "birthPlace" TEXT,
+  "birthDate" DATETIME,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY ("managedGymId") REFERENCES "Gym"("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE TABLE "Gym" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "name" TEXT NOT NULL,
+  "city" TEXT NOT NULL,
+  "address" TEXT NOT NULL,
+  "openHours" TEXT NOT NULL,
+  "phone" TEXT NOT NULL,
+  "imageUrl" TEXT NOT NULL,
+  "rating" REAL NOT NULL DEFAULT 0,
+  "memberCount" INTEGER NOT NULL DEFAULT 0,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX "Gym_name_key" ON "Gym"("name");
+CREATE TABLE "GymFacility" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "gymId" TEXT NOT NULL,
+  "label" TEXT NOT NULL,
+  "icon" TEXT NOT NULL,
+  FOREIGN KEY ("gymId") REFERENCES "Gym"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE "GymImage" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "gymId" TEXT NOT NULL,
+  "url" TEXT NOT NULL,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY ("gymId") REFERENCES "Gym"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE "GymPlan" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "gymId" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "price" INTEGER NOT NULL,
+  "durationDays" INTEGER NOT NULL,
+  "note" TEXT NOT NULL,
+  "isPopular" BOOLEAN NOT NULL DEFAULT false,
+  FOREIGN KEY ("gymId") REFERENCES "Gym"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE "GymMembership" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "userId" TEXT NOT NULL,
+  "gymId" TEXT NOT NULL,
+  "planId" TEXT NOT NULL,
+  "price" INTEGER NOT NULL,
+  "startDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "endDate" DATETIME NOT NULL,
+  "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+  FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY ("gymId") REFERENCES "Gym"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+  FOREIGN KEY ("planId") REFERENCES "GymPlan"("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+CREATE TABLE "TrainerProfile" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "userId" TEXT NOT NULL,
+  "gymId" TEXT NOT NULL,
+  "specialization" TEXT NOT NULL,
+  "experienceYears" INTEGER NOT NULL DEFAULT 0,
+  "bio" TEXT NOT NULL DEFAULT '',
+  "rating" REAL NOT NULL DEFAULT 0,
+  "reviewsCount" INTEGER NOT NULL DEFAULT 0,
+  "isActive" BOOLEAN NOT NULL DEFAULT true,
+  FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY ("gymId") REFERENCES "Gym"("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX "TrainerProfile_userId_key" ON "TrainerProfile"("userId");
+CREATE TABLE "TrainerSchedule" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "trainerId" TEXT NOT NULL,
+  "day" TEXT NOT NULL,
+  "startTime" TEXT NOT NULL,
+  "endTime" TEXT NOT NULL,
+  FOREIGN KEY ("trainerId") REFERENCES "TrainerProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE "Booking" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "clientId" TEXT NOT NULL,
+  "trainerId" TEXT NOT NULL,
+  "scheduledAt" DATETIME NOT NULL,
+  "durationMin" INTEGER NOT NULL DEFAULT 60,
+  "note" TEXT NOT NULL DEFAULT '',
+  "goalType" TEXT NOT NULL DEFAULT 'GENERAL',
+  "status" TEXT NOT NULL DEFAULT 'PENDING',
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY ("clientId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY ("trainerId") REFERENCES "TrainerProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE "TrainingSession" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "bookingId" TEXT NOT NULL,
+  "attendance" TEXT NOT NULL,
+  "intensity" INTEGER NOT NULL,
+  "notes" TEXT NOT NULL DEFAULT '',
+  "completedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY ("bookingId") REFERENCES "Booking"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX "TrainingSession_bookingId_key" ON "TrainingSession"("bookingId");
+CREATE TABLE "ClientGoal" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "clientId" TEXT NOT NULL,
+  "trainerId" TEXT NOT NULL,
+  "description" TEXT NOT NULL,
+  "targetCalories" INTEGER,
+  "targetProtein" INTEGER,
+  "updatedAt" DATETIME NOT NULL,
+  FOREIGN KEY ("clientId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY ("trainerId") REFERENCES "TrainerProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX "ClientGoal_clientId_trainerId_key" ON "ClientGoal"("clientId", "trainerId");
+CREATE TABLE "MealPlanItem" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "clientId" TEXT NOT NULL,
+  "trainerId" TEXT NOT NULL,
+  "time" TEXT NOT NULL,
+  "category" TEXT NOT NULL,
+  "description" TEXT NOT NULL,
+  "calories" INTEGER NOT NULL,
+  "protein" INTEGER NOT NULL,
+  "updatedAt" DATETIME NOT NULL,
+  FOREIGN KEY ("clientId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY ("trainerId") REFERENCES "TrainerProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);

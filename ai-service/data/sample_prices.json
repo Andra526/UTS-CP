@@ -1,0 +1,25 @@
+{
+  "_note": "Harga CONTOH per kg (atau per liter untuk susu) dalam rupiah. Ganti dengan data harga pasar nyata.",
+  "currency": "IDR",
+  "unit": "kg",
+  "prices": {
+    "telur_ayam": 28000,
+    "dada_ayam": 38000,
+    "tempe": 18000,
+    "tahu": 12000,
+    "ikan_lele": 32000,
+    "daging_sapi": 130000,
+    "beras_putih": 14000,
+    "beras_merah": 22000,
+    "kentang": 16000,
+    "oatmeal": 45000,
+    "ubi": 12000,
+    "brokoli": 30000,
+    "bayam": 10000,
+    "wortel": 14000,
+    "pisang": 18000,
+    "apel": 35000,
+    "susu_uht": 19000,
+    "yogurt": 30000
+  }
+}

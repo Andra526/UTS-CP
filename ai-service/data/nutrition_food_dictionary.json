@@ -1,0 +1,133 @@
+{
+  "_note": "Nilai gizi perkiraan untuk demo, bukan data resmi.",
+  "foods": {
+    "nasi_putih": {
+      "name": "Nasi Putih",
+      "serving": "1 porsi (150 g)",
+      "calories": 195,
+      "protein_g": 3.5,
+      "carbs_g": 43,
+      "fat_g": 0.4
+    },
+    "nasi_merah": {
+      "name": "Nasi Merah",
+      "serving": "1 porsi (150 g)",
+      "calories": 165,
+      "protein_g": 3.6,
+      "carbs_g": 34,
+      "fat_g": 1.4
+    },
+    "ayam_dada_rebus": {
+      "name": "Dada Ayam Rebus",
+      "serving": "1 porsi (100 g)",
+      "calories": 165,
+      "protein_g": 31,
+      "carbs_g": 0,
+      "fat_g": 3.6
+    },
+    "ayam_goreng": {
+      "name": "Ayam Goreng",
+      "serving": "1 potong (100 g)",
+      "calories": 260,
+      "protein_g": 27,
+      "carbs_g": 8,
+      "fat_g": 14
+    },
+    "telur_rebus": {
+      "name": "Telur Rebus",
+      "serving": "1 butir (50 g)",
+      "calories": 78,
+      "protein_g": 6.3,
+      "carbs_g": 0.6,
+      "fat_g": 5.3
+    },
+    "tempe_goreng": {
+      "name": "Tempe Goreng",
+      "serving": "2 potong (50 g)",
+      "calories": 150,
+      "protein_g": 9.5,
+      "carbs_g": 8,
+      "fat_g": 9
+    },
+    "tahu_goreng": {
+      "name": "Tahu Goreng",
+      "serving": "2 potong (80 g)",
+      "calories": 140,
+      "protein_g": 9,
+      "carbs_g": 3,
+      "fat_g": 10
+    },
+    "ikan_salmon": {
+      "name": "Ikan Salmon Panggang",
+      "serving": "1 porsi (100 g)",
+      "calories": 206,
+      "protein_g": 22,
+      "carbs_g": 0,
+      "fat_g": 12
+    },
+    "daging_sapi": {
+      "name": "Daging Sapi Tenderloin",
+      "serving": "1 porsi (100 g)",
+      "calories": 190,
+      "protein_g": 26,
+      "carbs_g": 0,
+      "fat_g": 9
+    },
+    "brokoli_kukus": {
+      "name": "Brokoli Kukus",
+      "serving": "1 mangkuk (100 g)",
+      "calories": 35,
+      "protein_g": 2.4,
+      "carbs_g": 7,
+      "fat_g": 0.4
+    },
+    "pisang": {
+      "name": "Pisang",
+      "serving": "1 buah (100 g)",
+      "calories": 89,
+      "protein_g": 1.1,
+      "carbs_g": 23,
+      "fat_g": 0.3
+    },
+    "oatmeal": {
+      "name": "Oatmeal",
+      "serving": "1 mangkuk (80 g)",
+      "calories": 300,
+      "protein_g": 10,
+      "carbs_g": 54,
+      "fat_g": 5
+    },
+    "greek_yogurt": {
+      "name": "Greek Yogurt",
+      "serving": "1 cup (200 g)",
+      "calories": 130,
+      "protein_g": 20,
+      "carbs_g": 8,
+      "fat_g": 0.8
+    },
+    "kentang_panggang": {
+      "name": "Kentang Panggang",
+      "serving": "1 buah (150 g)",
+      "calories": 140,
+      "protein_g": 3,
+      "carbs_g": 32,
+      "fat_g": 0.2
+    },
+    "bakso": {
+      "name": "Bakso Sapi",
+      "serving": "5 butir (100 g)",
+      "calories": 210,
+      "protein_g": 11,
+      "carbs_g": 14,
+      "fat_g": 12
+    },
+    "nasi_goreng": {
+      "name": "Nasi Goreng",
+      "serving": "1 piring (250 g)",
+      "calories": 400,
+      "protein_g": 9,
+      "carbs_g": 58,
+      "fat_g": 14
+    }
+  }
+}
